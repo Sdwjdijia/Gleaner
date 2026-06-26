@@ -35,7 +35,8 @@ st.markdown(
         -webkit-text-fill-color: transparent;
         animation: gradient-move 4s ease infinite;
         padding: 15px;
-        margin-bottom: 60px !important;
+        
+        margin-bottom: 60px !important; 
     }
 
     .footer {
@@ -48,11 +49,10 @@ st.markdown(
     }
     </style>
     
-    <h1 class="cool-title">🕵️ Ｇleaner偵查系統</h1>
+    <h1 class="cool-title">🕵️ Gleaner偵查系統</h1>
     """,
     unsafe_allow_html=True
 )
-
 # =========================================================================
 # 2. 簡化版 5 秒開場進度條
 # =========================================================================
@@ -84,23 +84,22 @@ if st.session_state.loaded:
         value=300, 
         step=50
     )
+    
     st.sidebar.markdown("---")
     st.sidebar.info("💡 抓取數量越多，後端解析關鍵字需要的時間就會稍微變長。")
 
     # 主頁面網址輸入
-    raw_video_url = st.text_input("🔗 請輸入要為您偵查的YouTube影片連結:", placeholder="https://www.youtube.com/watch?v=...")
-    
-    video_url = raw_video_url.strip() if raw_video_url else ""
+    video_url = st.text_input("🔗 請輸入要為您偵查的YouTube影片連結:", placeholder="https://www.youtube.com/watch?v=...")
 
     if video_url:
-        with st.spinner("🕵️ Intercepting and analyzing video comment feedback..."):
+        with st.spinner("正在為您查詢和分析中..."):
             try:
                 downloader = YoutubeCommentDownloader()
                 comments_iter = downloader.get_comments_from_url(video_url, sort_by=SORT_BY_POPULAR)
                 
                 comments_list = []
                 for i, comment in enumerate(comments_iter):
-                    if i >= max_comments: 
+                    if i >= max_comments: # 依據側邊欄設定的數量限制
                         break
                     comments_list.append({
                         "發言者": comment.get('author', '匿名'),
@@ -116,27 +115,27 @@ if st.session_state.loaded:
                 else:
                     st.success(f"✅ 成功攻破並分析前排 {len(df)} 條熱門留言！")
                     
+                    # 左右配置呈現兩大核心功能
                     col_left, col_right = st.columns(2)
                     
-                    # ---- 左半邊：Top 5 留言 ----
                     with col_left:
+                        # 功能一：最高讚數留言 (Top 5)
                         st.subheader("🏆 1. 最高讚數留言 Top 5")
                         top_5_df = df.sort_values(by="讚數", ascending=False).head(5)
                         st.dataframe(top_5_df[["發言者", "讚數", "留言內容"]], use_container_width=True, hide_index=True)
                     
-                    # ---- 右半邊：關鍵字統計 ----
                     with col_right:
+                        # 功能二：最多關鍵字統計 (Jieba 斷詞)
                         st.subheader("🔍 2. 熱門關鍵字統計 (前 10 名)")
                         all_text = " ".join(df["留言內容"].astype(str).tolist())
                         
-                        # 讀取外部贅字表
+                        # 🔄 修正區塊：讀取 .txt 檔案並安全執行斷詞流程
                         try:
                             with open("stopwords.txt", "r", encoding="utf-8") as f:
                                 stopwords = {line.strip() for line in f if line.strip()}
                         except FileNotFoundError:
                             stopwords = set()                        
                         
-                        # 進行斷詞過濾（修正：搬出錯誤處理區塊，確保不論有沒有讀到檔都會執行）
                         words = [
                             w for w in jieba.cut(all_text) 
                             if len(w) > 1 and not w.isspace() and w not in stopwords
