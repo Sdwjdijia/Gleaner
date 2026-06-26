@@ -127,8 +127,12 @@ if st.session_state.loaded:
                         st.subheader("🔍 2. 熱門關鍵字統計 (前 10 名)")
                         all_text = " ".join(df["留言內容"].astype(str).tolist())
                         
-                        stopwords = {"這個", "可以", "哈哈", "真的", "覺得", "知道", "什麼", "影片", "已經", "怎麼", "因為"}
-                        
+                try:
+                    with open("stopwords.txt", "r", encoding="utf-8") as f:
+                        stopwords = {line.strip() for line in f if line.strip()}
+                except FileNotFoundError:
+                        # 防呆機制：萬一檔案不小心不見了，預設一個空的集合，避免整個網頁掛掉
+                        stopwords = set()                        
                         # 在斷詞時，順便把在過濾清單裡的字以及單個字排除掉
                         words = [
                             w for w in jieba.cut(all_text) 
