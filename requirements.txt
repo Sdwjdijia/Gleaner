@@ -1,0 +1,4 @@
+streamlit
+youtube-comment-downloader
+pandas
+jieba
