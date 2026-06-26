@@ -48,7 +48,7 @@ st.markdown(
     }
     </style>
     
-    <h1 class="cool-title">🕵️ Gleaner偵查系統</h1>
+    <h1 class="cool-title">🕵️ 《格瑞那報》偵查系統</h1>
     """,
     unsafe_allow_html=True
 )
@@ -93,7 +93,7 @@ if st.session_state.loaded:
     video_url = raw_video_url.strip() if raw_video_url else ""
 
     if video_url:
-        with st.spinner("正在為您查詢和分析中..."):
+        with st.spinner("🕵️ Intercepting and analyzing video comment feedback..."):
             try:
                 downloader = YoutubeCommentDownloader()
                 comments_iter = downloader.get_comments_from_url(video_url, sort_by=SORT_BY_POPULAR)
@@ -118,22 +118,25 @@ if st.session_state.loaded:
                     
                     col_left, col_right = st.columns(2)
                     
+                    # ---- 左半邊：Top 5 留言 ----
                     with col_left:
                         st.subheader("🏆 1. 最高讚數留言 Top 5")
                         top_5_df = df.sort_values(by="讚數", ascending=False).head(5)
                         st.dataframe(top_5_df[["發言者", "讚數", "留言內容"]], use_container_width=True, hide_index=True)
                     
+                    # ---- 右半邊：關鍵字統計 ----
                     with col_right:
                         st.subheader("🔍 2. 熱門關鍵字統計 (前 10 名)")
                         all_text = " ".join(df["留言內容"].astype(str).tolist())
                         
-                try:
-                    with open("stopwords.txt", "r", encoding="utf-8") as f:
-                        stopwords = {line.strip() for line in f if line.strip()}
-                except FileNotFoundError:
-                        # 防呆機制：萬一檔案不小心不見了，預設一個空的集合，避免整個網頁掛掉
-                        stopwords = set()                        
-                        # 在斷詞時，順便把在過濾清單裡的字以及單個字排除掉
+                        # 讀取外部贅字表
+                        try:
+                            with open("stopwords.txt", "r", encoding="utf-8") as f:
+                                stopwords = {line.strip() for line in f if line.strip()}
+                        except FileNotFoundError:
+                            stopwords = set()                        
+                        
+                        # 進行斷詞過濾（修正：搬出錯誤處理區塊，確保不論有沒有讀到檔都會執行）
                         words = [
                             w for w in jieba.cut(all_text) 
                             if len(w) > 1 and not w.isspace() and w not in stopwords
