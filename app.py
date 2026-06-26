@@ -119,17 +119,14 @@ if st.session_state.loaded:
                     col_left, col_right = st.columns(2)
                     
                     with col_left:
-                        # 功能一：最高讚數留言 (Top 5)
-                        st.subheader("🏆 1. 最高讚數留言 Top 5")
-                        top_5_df = df.sort_values(by="讚數", ascending=False).head(5)
-                        st.dataframe(top_5_df[["發言者", "讚數", "留言內容"]], use_container_width=True, hide_index=True)
+                        st.subheader("🏆 1. 最高讚數留言 排行")
+                        all_ranked_df = df.sort_values(by="讚數", ascending=False)
+                        st.dataframe(all_ranked_df[["發言者", "讚數", "留言內容"]], use_container_width=True, hide_index=True)
                     
                     with col_right:
-                        # 功能二：最多關鍵字統計 (Jieba 斷詞)
                         st.subheader("🔍 2. 熱門關鍵字統計 (前 10 名)")
                         all_text = " ".join(df["留言內容"].astype(str).tolist())
                         
-                        # 🔄 修正區塊：讀取 .txt 檔案並安全執行斷詞流程
                         try:
                             with open("stopwords.txt", "r", encoding="utf-8") as f:
                                 stopwords = {line.strip() for line in f if line.strip()}
