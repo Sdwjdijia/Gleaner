@@ -48,7 +48,7 @@ st.markdown(
     }
     </style>
     
-    <h1 class="cool-title">🕵️ 《格瑞那報》偵查系統</h1>
+    <h1 class="cool-title">🕵️ Ｇleaner偵查系統</h1>
     """,
     unsafe_allow_html=True
 )
